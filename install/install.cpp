@@ -47,7 +47,6 @@
 #include <android-base/unique_fd.h>
 
 #include "install/snapshot_utils.h"
-#include "install/spl_check.h"
 #include "install/wipe_data.h"
 #include "install/wipe_device.h"
 #include "otautil/error_code.h"
@@ -411,12 +410,6 @@ static InstallResult TryUpdateBinary(Package* package, bool* wipe_cache,
   bool ab_device_supports_nonab = true;
   bool device_only_supports_ab = device_supports_ab && !ab_device_supports_nonab;
   bool device_supports_virtual_ab = android::base::GetBoolProperty("ro.virtual_ab.enabled", false);
-
-  const auto current_spl = android::base::GetProperty("ro.build.version.security_patch", "");
-  if (ViolatesSPLDowngrade(zip, current_spl)) {
-    LOG(ERROR) << "Denying OTA because it's SPL downgrade";
-    return INSTALL_ERROR;
-  }
 
   if (package_is_ab) {
     CHECK(package->GetType() == PackageType::kFile);
